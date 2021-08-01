@@ -1,7 +1,7 @@
-./a.out: a.cpp Makefile
+a.out: a.cpp Makefile
 	g++ a.cpp -Wall -Wpedantic -std=c++17
 
-run:
+run: a.out
 	./a.out < pipe > pipe2
 
 server:
