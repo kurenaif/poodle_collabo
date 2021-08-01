@@ -27,11 +27,16 @@ vector<int> merge_blocks(vector<vector<int> > blocks) {
   return res;
 }
 
-bool solve() {
+bool solve(int ofs) {
+  // ofs: 0-15
   // prefix
-  cout << 10 << endl;
+  int in_ofs = ofs & 0xf;
+  cout << (31 - in_ofs) << endl;
   // suffix
-  cout << 0 << endl;
+  cout << (10 + 32 - (31 - in_ofs)) << endl;
+  // ofs = 0
+  // 31
+  // 48
 
   // cipher input
   int num;
@@ -43,16 +48,20 @@ bool solve() {
   // ここでblocksを編集してね
   // わかった！
   // 最初から2ブロック目の最後のバイトを特定したい(c2の末尾)
+  // [c1          ] [c2           ] ... [] [clast]
+  // m[31];
   auto &last_block = blocks[blocks.size() - 1];
-  last_block = blocks[1];  // c2
+  last_block = blocks[1 + ofs / 16];  // c2
 
   // debug output
+  /*
   for (const auto &a : blocks) {
     for (const auto &b : a) {
       fprintf(stderr, "0x%02X ", b);
     }
     fprintf(stderr, "\n");
   }
+  */
 
   C = merge_blocks(blocks);
 
@@ -64,29 +73,31 @@ bool solve() {
   string res;
   cin >> res;
   if (res.find("ok") == string::npos) {
-    cerr << "ng" << endl;
+    //cerr << "ng" << endl;
     return false;
   }
-  cerr << "ok" << endl;
+  //cerr << "ok" << endl;
 
   // うまくいったとき == 最後のブロックを書き換えて、verificationも通った！
   // → 最後のひとつ前のブロックの最後のバイトをxとしたときに
   // c2をAESに通したあと(XORの前)のバイトをyとしたときに
   // y = x ^ 16
   // これにc1の最後のバイトzをxorしてあげると、c2に対応する平文(m2)の最後のバイトaが得られる
-  auto &c1 = blocks[0];
+  auto &c1 = blocks[ofs/16];
   auto x = blocks[blocks.size() - 2].back();
   auto y = x ^ 16;
   auto a = y ^ c1.back();
-  fprintf(stderr, "ans: %c\n", a);
+  fprintf(stderr, "%c", a);
 
   return true;
 }
 
 int main(void) {
-  for (int i = 0; i < 1000; i++) {
-    if (solve()) {
-      break;
+  for (int k = 0; k < 48; k++) {
+    for (int i = 0; i < 1000; i++) {
+      if (solve(k)) {
+        break;
+      }
     }
   }
 }
